@@ -26,13 +26,21 @@ export async function POST(req) {
     const client = await clientPromise;
     const db = client.db('blogapp');
 
-    // Parse the request body to get post data
-    const { name, content } = await req.json();
+    // Parse the request body to get the post data
+    const { name } = await req.json();
+
+    // Check if name is provided and not empty
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      return new Response(JSON.stringify({ error: 'Name is required and must be a valid string' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,  // Bad request
+      });
+    }
 
     // Insert a new post into the 'posts' collection
-    const result = await db.collection('posts').insertOne({ name,});
+    const result = await db.collection('posts').insertOne({ name });
 
-    // Use result.insertedId to get the ID of the newly inserted document
+    // Return success response with the inserted post ID
     return new Response(JSON.stringify({
       message: 'Post added successfully',
       postId: result.insertedId,
