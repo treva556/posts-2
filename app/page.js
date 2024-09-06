@@ -1,5 +1,6 @@
 
 // app/page.js
+
 "use client"; // Add this directive to use client-side features
 
 import React, { useState, useEffect } from 'react';
@@ -33,8 +34,26 @@ export default function Home() {
     fetchPosts();
   }, [apiUrl]);
 
+  // Handle post deletion
+  const handleDelete = async (postId) => {
+    try {
+      const res = await fetch(`${apiUrl}/api/posts/${postId}`, {
+        method: 'DELETE',
+      });
+  
+      if (!res.ok) {
+        throw new Error('Failed to delete post');
+      }
+  
+      setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      setError(error.message);
+    }
+  };
+
   const handleNavigate = () => {
-    router.push('/add-posts'); // Navigate to the 'add-post' page
+    router.push('/add-posts'); // Navigate to the 'add-posts' page
   };
 
   return (
@@ -56,8 +75,14 @@ export default function Home() {
           <ul className='border border-black'>
             {posts.length > 0 ? (
               posts.map(post => (
-                <li className='p-4 border-b border-black' key={post._id}>
-                  {post.name}
+                <li className='p-4 border-b border-black flex justify-between items-center' key={post._id}>
+                  <span>{post.name}</span>
+                  <button
+                    onClick={() => handleDelete(post._id)} // Add the delete handler
+                    className='px-2 py-1 bg-red-500 text-white rounded hover:bg-red-700'
+                  >
+                    Delete
+                  </button>
                 </li>
               ))
             ) : (
@@ -69,6 +94,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 
