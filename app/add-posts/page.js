@@ -40,7 +40,8 @@ export default function AddPost() {
   };
 
   return (
-    <div>
+    <div className=' flex justify-center items-center'>
+        <div className=' pt-64'>
       <h1>Add a New Post</h1>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -49,7 +50,7 @@ export default function AddPost() {
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="name">Post Title</label>
-          <input className=' text-black'
+          <input className=' ml-4 text-black'
             type="text"
             id="name"
             value={name}
@@ -66,8 +67,9 @@ export default function AddPost() {
             required
           ></textarea>
         </div> */}
-        <button type="submit">Add Post</button>
+        <button className=' mt-4 bg-green-700 rounded-xl p-1' type="submit">Add Post</button>
       </form>
+      </div>
     </div>
   );
 }
