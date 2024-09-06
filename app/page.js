@@ -160,7 +160,7 @@ export default function Home() {
                 </li>
               ))
             ) : (
-              <li className='p-4'>No posts available</li>
+              <li className='p-4'>Loading...</li>
             )}
           </ul>
         )}
