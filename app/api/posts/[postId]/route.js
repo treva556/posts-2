@@ -1,44 +1,47 @@
 
+
+
 //app/api/posts/[postId]/route.js
-// app/api/posts/[postId]/route.js
-import clientPromise from '../../../../lib/mongodb';
+import { connectToDatabase } from '../../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-export async function DELETE(req) {
-  try {
-    const client = await clientPromise;
-    const db = client.db('blogapp');
-    
-    // Extract postId from the URL path
-    const postId = req.nextUrl.pathname.split('/').pop();
+export default async function handler(req, res) {
+  const { method } = req;
+  const { postId } = req.query;
 
-    if (!postId || !ObjectId.isValid(postId)) {
-      return new Response(JSON.stringify({ error: 'Invalid post ID' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 400,
-      });
+  const { db } = await connectToDatabase();
+  const postsCollection = db.collection('posts');
+
+  if (method === 'POST') {
+    try {
+      const { text, author } = req.body;
+
+      if (!text || !author) {
+        return res.status(400).json({ error: 'Author and text are required' });
+      }
+
+      const newComment = {
+        text,
+        author,
+        createdAt: new Date(),
+      };
+
+      const result = await postsCollection.updateOne(
+        { _id: new ObjectId(postId) }, // Find the post by its ID
+        { $push: { comments: newComment } } // Add the new comment to the comments array
+      );
+
+      if (result.modifiedCount === 0) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+
+      res.status(200).json({ message: 'Comment added successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
     }
-
-    const result = await db.collection('posts').deleteOne({ _id: new ObjectId(postId) });
-
-    if (result.deletedCount === 0) {
-      return new Response(JSON.stringify({ error: 'Post not found' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 404,
-      });
-    }
-
-    return new Response(JSON.stringify({ message: 'Post deleted successfully' }), {
-      headers: { 'Content-Type': 'application/json' },
-      status: 200,
-    });
-  } catch (error) {
-    console.error('Error deleting post:', error);
-    return new Response(JSON.stringify({ error: 'Failed to delete post' }), {
-      headers: { 'Content-Type': 'application/json' },
-      status: 500,
-    });
+  } else {
+    res.setHeader('Allow', ['POST']);
+    res.status(405).end(`Method ${method} Not Allowed`);
   }
 }
-
 
