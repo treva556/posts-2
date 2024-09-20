@@ -1,4 +1,6 @@
 
+
+//app/posts/add-posts/page.js
 'use client';
 
 import { useState } from 'react';
@@ -73,3 +75,4 @@ export default function AddPost() {
     </div>
   );
 }
+
